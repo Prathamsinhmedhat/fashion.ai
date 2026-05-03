@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Fashion Stylist</title>
+</head>
+<body>
+
+<h2>AI Fashion Stylist</h2>
+
+<form id="form">
+    Gender: <input type="text" id="gender"><br><br>
+    Style: <input type="text" id="style"><br><br>
+    Budget: <input type="number" id="budget"><br><br>
+    Occasion: <input type="text" id="occasion"><br><br>
+    Hobby: <input type="text" id="hobby"><br><br>
+
+    <button type="submit">Get Outfit</button>
+</form>
+
+<h3>Recommendations:</h3>
+<ul id="result"></ul>
+
+<script>
+document.getElementById("form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const data = {
+        gender: document.getElementById("gender").value,
+        style: document.getElementById("style").value,
+        budget: parseInt(document.getElementById("budget").value),
+        occasion: document.getElementById("occasion").value,
+        hobby: document.getElementById("hobby").value
+    };
+
+    const response = await fetch("http://127.0.0.1:8000/recommend", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    const list = document.getElementById("result");
+    list.innerHTML = "";
+
+    result.recommendations.forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${item.link}" target="_blank">${item.name}</a> - ₹${item.price}`;
+        list.appendChild(li);
+    });
+});
+</script>
+
+</body>
+</html>
