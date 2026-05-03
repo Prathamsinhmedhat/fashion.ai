@@ -56,7 +56,7 @@ def get_products_serpapi(query):
             "q": f"{query} site:myntra.com OR site:ajio.com OR site:amazon.in",
             "hl": "en",
             "gl": "in",
-            "api_key": os.getenv("SERPAPI_KEY")  # MUST set in secrets
+            "api_key": os.getenv("cd0500d57fe76691dda83d380f41d4d7a72ed24459143acf43616c16db2335d3")  # MUST set in secrets
         }
 
         search = GoogleSearch(params)
