@@ -100,12 +100,6 @@ with st.sidebar:
 
     generate_btn = st.button("✨ Find My Style")
 
-    st.markdown("---")
-
-    st.sidebar.title("Nevigation")
-    page = st.sidebar.radio("Go To", ["Home","Seller Dashboard"])
-    if page == "Seller Dashboard":
-        st.switch_page("pages/seller.py")
 
 # -------------------------------
 # 🧠 SESSION DATA
