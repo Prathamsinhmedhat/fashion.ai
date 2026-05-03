@@ -1,5 +1,6 @@
 import streamlit as st
 import serpapi
+from serpapi import GoogleSearch
 import datetime
 from streamlit.runtime.scriptrunner import get_script_run_ctx
 # -------------------------------
