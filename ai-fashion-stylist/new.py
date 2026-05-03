@@ -47,7 +47,7 @@ st.markdown("""
 sponsored_brands = ["Nike", "Adidas", "Puma", "Zara"]
 
 # -------------------------------
-# 🔥 FIXED API FUNCTION
+# 🔥 API FUNCTION (CORRECT)
 # -------------------------------
 def get_products_serpapi(query):
     try:
@@ -56,7 +56,7 @@ def get_products_serpapi(query):
             "q": f"{query} site:myntra.com OR site:ajio.com OR site:amazon.in",
             "hl": "en",
             "gl": "in",
-            "api_key": os.getenv("SERPAPI_KEY")  # ✅ correct
+            "api_key": os.getenv("SERPAPI_KEY")  # MUST set in secrets
         }
 
         search = GoogleSearch(params)
@@ -83,7 +83,6 @@ def get_products_serpapi(query):
 # 📂 SIDEBAR
 # -------------------------------
 with st.sidebar:
-
     st.title("StyleVerse")
 
     gender = st.selectbox("Gender", ["Male", "Female"])
@@ -93,8 +92,8 @@ with st.sidebar:
     product_type = st.selectbox("Outfit", ["T-shirt", "Shirt", "Jeans"])
     footwear_type = st.selectbox("Footwear", ["Sneakers", "Shoes"])
     accessories_type = st.selectbox("Accessory", ["Watch", "Bag"])
-    budget = st.slider("Budget (₹)", 500, 20000, 5000)
 
+    budget = st.slider("Budget (₹)", 500, 20000, 5000)
     generate_btn = st.button("✨ Find My Style")
 
 # -------------------------------
@@ -156,7 +155,7 @@ def display_products(items):
         items = [p for p in items if p["source"] == selected_brand]
 
     if not items:
-        st.info("No products")
+        st.info("No products found")
         return
 
     sponsored = [p for p in items if p["source"] in sponsored_brands]
