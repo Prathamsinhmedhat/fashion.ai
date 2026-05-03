@@ -1,6 +1,6 @@
 import streamlit as st
-import serpapi
 from serpapi import GoogleSearch
+import os
 import datetime
 from streamlit.runtime.scriptrunner import get_script_run_ctx
 # -------------------------------
@@ -55,15 +55,22 @@ sponsored_brands = ["Nike", "Adidas", "Puma", "Zara"]
 # 🔥 API FUNCTION
 # -------------------------------
 def get_products_serpapi(query):
-    client = serpapi.Client(api_key="cd0500d57fe76691dda83d380f41d4d7a72ed24459143acf43616c16db2335d3")
-
     try:
-        results = client.search({
+        params = {
             "engine": "google_shopping",
             "q": query,
             "hl": "en",
-            "gl": "in"
-        })
+            "gl": "in",
+            "api_key": os.getenv("cd0500d57fe76691dda83d380f41d4d7a72ed24459143acf43616c16db2335d3")  # secure way
+        }
+
+        search = GoogleSearch(params)
+        results = search.get_dict()
+
+        return results.get("shopping_results", [])
+
+    except Exception as e:
+        return []        
 
         items = []
         for product in results.get("shopping_results", [])[:12]:
