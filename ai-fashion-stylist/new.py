@@ -86,8 +86,7 @@ def get_products_serpapi(query):
 
 with st.sidebar:
 
-    #LOGO
-    st.image('logo.png', width=200)
+    
     st.title("StyleVerse")
 
     gender = st.selectbox("Gender", ["Male", "Female"])
