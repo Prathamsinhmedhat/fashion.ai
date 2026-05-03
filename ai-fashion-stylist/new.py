@@ -2,7 +2,7 @@ import streamlit as st
 from serpapi import GoogleSearch
 import os
 import datetime
-from streamlit.runtime.scriptrunner import get_script_run_ctx
+
 # -------------------------------
 # ⚡ PAGE CONFIG
 # -------------------------------
@@ -11,11 +11,6 @@ st.set_page_config(
     page_icon="👕",
     layout="wide"
 )
-
-# -------------------------------
-# 🧑‍💼 SELLER SYSTEM
-# -------------------------------
-
 
 # -------------------------------
 # 🎨 UI STYLING
@@ -52,27 +47,23 @@ st.markdown("""
 sponsored_brands = ["Nike", "Adidas", "Puma", "Zara"]
 
 # -------------------------------
-# 🔥 API FUNCTION
+# 🔥 API FUNCTION (FIXED)
 # -------------------------------
 def get_products_serpapi(query):
     try:
         params = {
             "engine": "google_shopping",
-            "q": query,
+            "q": f"{query} site:myntra.com OR site:ajio.com OR site:amazon.in",
             "hl": "en",
             "gl": "in",
-            "api_key": os.getenv("cd0500d57fe76691dda83d380f41d4d7a72ed24459143acf43616c16db2335d3")  # secure way
+            "api_key": os.getenv("SERPAPI_KEY")  # ✅ correct usage
         }
 
         search = GoogleSearch(params)
         results = search.get_dict()
 
-        return results.get("shopping_results", [])
-
-    except Exception as e:
-        return []        
-
         items = []
+
         for product in results.get("shopping_results", [])[:12]:
             items.append({
                 "name": product.get("title"),
@@ -82,19 +73,17 @@ def get_products_serpapi(query):
                 "fallback": product.get("product_link"),
                 "source": product.get("source", "Store")
             })
+
         return items
-    except:
-        st.warning("⚠️ API Error")
+
+    except Exception as e:
+        st.error(f"API Error: {e}")
         return []
 
 # -------------------------------
 # 📂 SIDEBAR
 # -------------------------------
-
 with st.sidebar:
-
-    
-
     gender = st.selectbox("Gender", ["Male", "Female"])
     style = st.selectbox("Style", ["Casual", "Formal", "Streetwear"])
     occasion = st.selectbox("Occasion", ["College", "Office", "Party"])
@@ -102,35 +91,42 @@ with st.sidebar:
     product_type = st.selectbox("Outfit", ["T-shirt", "Shirt", "Jeans"])
     footwear_type = st.selectbox("Footwear", ["Sneakers", "Shoes"])
     accessories_type = st.selectbox("Accessory", ["Watch", "Bag"])
+
     budget = st.slider("Budget (₹)", 500, 20000, 5000)
-
     generate_btn = st.button("✨ Find My Style")
-
-
 
 # -------------------------------
 # 🧠 SESSION DATA
 # -------------------------------
-if "outfits" not in st.session_state: st.session_state.outfits = []
-if "footwear" not in st.session_state: st.session_state.footwear = []
-if "accessories" not in st.session_state: st.session_state.accessories = []
+if "outfits" not in st.session_state:
+    st.session_state.outfits = []
+if "footwear" not in st.session_state:
+    st.session_state.footwear = []
+if "accessories" not in st.session_state:
+    st.session_state.accessories = []
+if "products" not in st.session_state:
+    st.session_state.products = []
 
 # -------------------------------
 # 🚀 FETCH PRODUCTS
 # -------------------------------
 if generate_btn:
-    st.session_state.outfits = get_products_serpapi(f"{gender} {style} {product_type} {occasion} under {budget}")
-    st.session_state.footwear = get_products_serpapi(f"{gender} {style} {footwear_type} under {budget}")
-    st.session_state.accessories = get_products_serpapi(f"{gender} {style} {accessories_type} under {budget}")
-
+    st.session_state.outfits = get_products_serpapi(
+        f"{gender} {style} {product_type} {occasion} under {budget}"
+    )
+    st.session_state.footwear = get_products_serpapi(
+        f"{gender} {style} {footwear_type} under {budget}"
+    )
+    st.session_state.accessories = get_products_serpapi(
+        f"{gender} {style} {accessories_type} under {budget}"
+    )
 
 # -------------------------------
-# 🧠 MERGE SELLER PRODUCTS (ACTIVE ONLY)
+# 🧠 FILTER SELLER PRODUCTS
 # -------------------------------
 active_seller_products = []
-
 for p in st.session_state.get("products", []):
-    if p["expiry"] > datetime.datetime.now():
+    if p.get("expiry") and p["expiry"] > datetime.datetime.now():
         active_seller_products.append(p)
 
 all_items = (
@@ -141,7 +137,7 @@ all_items = (
 )
 
 if all_items:
-    brands = list(set([p["source"] for p in all_items if p["source"]]))
+    brands = list(set([p["source"] for p in all_items if p.get("source")]))
     selected_brand = st.selectbox("Filter by Brand", ["All"] + brands)
 else:
     selected_brand = "All"
@@ -151,15 +147,13 @@ else:
 # -------------------------------
 def display_products(items):
 
-    # Include seller products
     items = items + active_seller_products
 
-    # Filter
     if selected_brand != "All":
         items = [p for p in items if p["source"] == selected_brand]
 
     if not items:
-        st.info("No products")
+        st.info("No products found")
         return
 
     sponsored = [p for p in items if p["source"] in sponsored_brands]
@@ -182,8 +176,9 @@ def display_products(items):
                 </div>
                 """, unsafe_allow_html=True)
 
-                link = item["link"] if item["link"] else item["fallback"]
-                st.link_button("Buy", link, use_container_width=True)
+                link = item["link"] or item["fallback"]
+                if link:
+                    st.link_button("Buy", link, use_container_width=True)
 
     # Normal
     st.subheader("🛍️ Products")
@@ -200,8 +195,9 @@ def display_products(items):
             </div>
             """, unsafe_allow_html=True)
 
-            link = item["link"] if item["link"] else item["fallback"]
-            st.link_button("Buy", link, use_container_width=True)
+            link = item["link"] or item["fallback"]
+            if link:
+                st.link_button("Buy", link, use_container_width=True)
 
 # -------------------------------
 # 📊 TABS
