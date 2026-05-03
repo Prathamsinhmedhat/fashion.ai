@@ -87,7 +87,6 @@ def get_products_serpapi(query):
 with st.sidebar:
 
     
-    st.title("StyleVerse")
 
     gender = st.selectbox("Gender", ["Male", "Female"])
     style = st.selectbox("Style", ["Casual", "Formal", "Streetwear"])
@@ -99,6 +98,7 @@ with st.sidebar:
     budget = st.slider("Budget (₹)", 500, 20000, 5000)
 
     generate_btn = st.button("✨ Find My Style")
+
 
 
 # -------------------------------
